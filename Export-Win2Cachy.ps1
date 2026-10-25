@@ -21,7 +21,7 @@
 #>
 [CmdletBinding()]
 param(
-    [string]$Destination = 'Z:\Win2CachyOS',
+    [string]$Destination,          # default: first line of destination.txt beside this script, else Z:\Win2CachyOS
     [switch]$DryRun,
     [switch]$IncludeModels,        # ~/.ollama/models (large)
     [switch]$IncludeDownloads,     # %USERPROFILE%\Downloads (large)
@@ -37,6 +37,11 @@ param(
 $ErrorActionPreference = 'Continue'
 
 $Root     = $PSScriptRoot
+if (-not $Destination) {
+    $destFile = Join-Path $Root 'destination.txt'   # personal default, gitignored
+    if (Test-Path $destFile) { $Destination = (Get-Content $destFile | Where-Object { $_.Trim() } | Select-Object -First 1).Trim() }
+    if (-not $Destination) { $Destination = 'Z:\Win2CachyOS' }
+}
 $Catalog  = Get-Content -Raw -LiteralPath (Join-Path $Root 'catalog\apps.json') | ConvertFrom-Json
 $Stamp    = Get-Date -Format 'yyyyMMdd-HHmm'
 $Out      = Join-Path $Destination "$env:COMPUTERNAME-$Stamp"
@@ -531,3 +536,5 @@ $md.ToString() | Out-File -Encoding utf8 -LiteralPath (Join-Path $Out 'REPORT.md
 
 Say "`nDone. $mode, $(Format-Size $total). Blockers: $($Blockers.Count), warnings: $($Warnings.Count)" 'Green'
 Say "Report: $(Join-Path $Out 'REPORT.md')" 'Green'
+
+exit 0  # robocopy/git leave non-zero LASTEXITCODE values even on success

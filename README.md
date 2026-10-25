@@ -24,7 +24,7 @@ Fix what REPORT.md lists under **Do these before you wipe**. Then **close Notepa
 
 | Flag | What it adds |
 |---|---|
-| `-Destination X:\path` | Write somewhere other than `Z:\Win2CachyOS` |
+| `-Destination X:\path` | Write somewhere other than the default. To change the default, put a path on the first line of `destination.txt` next to the script (gitignored). Without one, the default is `Z:\Win2CachyOS` |
 | `-IncludeDownloads` | `%USERPROFILE%\Downloads` |
 | `-IncludeModels` | `~\.ollama\models` |
 | `-IncludeClaudeHistory` | `~\.claude\projects` transcripts |
@@ -55,6 +55,8 @@ sudo pacman -S --needed cifs-utils
 # mount the share you exported to (example: SMB share 'backups' on host 'nas')
 sudo mkdir -p /mnt/nas && sudo mount -t cifs //nas/backups /mnt/nas -o username=YOU,uid=$(id -u)
 cd /mnt/nas/Win2CachyOS/<PC>-<date>
+# or, if a home server already has the share mounted, skip CIFS and pull it over SSH:
+#   rsync -a user@server:/path/to/Win2CachyOS/<PC>-<date>/ ~/w2c/ && cd ~/w2c
 
 python3 linux/restore.py .            # plan only
 python3 linux/restore.py . --apply    # do it
